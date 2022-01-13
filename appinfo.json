@@ -1,10 +1,11 @@
 {
-	"id": "com.palmdts.enyo.helloworld",
+	"id": "com.jonandnic.enyo.webbtracker",
 	"version": "1.0.0",
 	"vendor": "HP",
 	"type": "web",
 	"main": "index.html",
-	"title": "Enyo HelloWorld",
+	"title": "Webb Tracker",
+	"splashicon": "jwlogo.png",
 	"icon": "icon.png",
 	"uiRevision": 2
 }

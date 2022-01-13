@@ -1,4 +1,4 @@
 ﻿enyo.depends(
-	"HelloWorld.js",
-	"HelloWorld.css"
+	"WebbTracker.js",
+	"WebbTracker.css"
 );
