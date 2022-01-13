@@ -1,4 +1,5 @@
 ﻿enyo.depends(
 	"WebbTracker.js",
-	"WebbTracker.css"
+	"WebbTracker.css",
+	"helpers/Updater.js"
 );
