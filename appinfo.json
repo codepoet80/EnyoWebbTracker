@@ -1,7 +1,7 @@
 {
 	"id": "com.jonandnic.enyo.webbtracker",
 	"version": "1.0.0",
-	"vendor": "HP",
+	"vendor": "Jon Wise",
 	"type": "web",
 	"main": "index.html",
 	"title": "Webb Tracker",
