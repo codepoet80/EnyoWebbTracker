@@ -2,6 +2,8 @@
 
 James Webb Space Telescope Tracker for Enyo.
 
+![App Icon](icon.png)
+
 ## What is This?
 
 This is an app for the defunct mobile webOS platform, made by Palm and later acquired by HP. It runs on devices like the Palm Pre or Pixi, or the HP
