@@ -1,4 +1,4 @@
-﻿var useUrl = "https://api.jwst-hub.com/track";
+﻿var useUrl = "http://www.webosarchive.com/jameswebb/";
 enyo.kind({
 	name: "enyo.WebbTracker",
 	kind: enyo.VFlexBox,
@@ -31,17 +31,48 @@ enyo.kind({
 					{w: "fill", name: "DeploymentDetail", content: "Current Deployment Stage: ", domStyles: {"text-align": "center", "margin-left": "100px", "margin-right": "100px"}}
 				]},
 			]},
-			{kind: "Button", caption: "Update", onclick: "loadData"}
-		]}
+			{kind: "Button", caption: "Update", onclick: "loadData", disabled: true }
+		]},
+		{
+            kind: "Popup",
+            name: "deadappPopup",
+            lazy: false,
+            layoutKind: "VFlexLayout",
+            style: "width: 80%;height:240px",
+            components: [
+                { content: "<b>James Webb is in position!</b>" },
+                {
+                    kind: "BasicScroller",
+                    flex: 1,
+                    components: [
+                        { name: "deadappMessage", kind: "HtmlContent", flex: 1, pack: "center", align: "left", style: "text-align: left;padding-top:10px;padding-bottom: 10px" }
+                    ]
+                },
+                {
+                    layoutKind: "HFlexLayout",
+                    pack: "center",
+                    components: [
+                        { kind: "Button", caption: "OK", onclick: "closePopup" },
+                    ]
+                }
+            ]
+        },
 	],
 	create: function() {
 		this.inherited(arguments);
+		
 		//Detect environment for appropriate service paths
-		enyo.log("Starting up on " + window.location.hostname);
-		if (window.location.hostname != ".media.cryptofs.apps.usr.palm.applications.com.jonandnic.enyo.webbtracker") {
+        enyo.log("Window location is " + JSON.stringify(window.location));
+        if(window.location.href.indexOf("file:///media/cryptofs") != -1) { // Running on LuneOS
+            enyo.log("LuneOS environment detected");
+        }
+        else if (window.location.hostname.indexOf(".media.cryptofs.apps") != -1) {   // Running on webOS
+            enyo.log("webOS environment detected");
+        } else {    // Running in a web browser
 			enyo.warn("webOS environment not detected, assuming a web server!");
 			useUrl = "localproxy.php?" + useUrl;			
-		}
+        }
+
 		//Setup the data list
 		this.data = [];
 		this.captions.forEach(function(currVal, index) {
@@ -51,6 +82,7 @@ enyo.kind({
 		this.loadData();
 		//Check for app updates
 		this.$.myUpdater.CheckForUpdate("Webb Telescope Tracker");
+
 	},
 	listSetupRow: function(inSender, inIndex) {
 		var record = this.data[inIndex];
@@ -59,6 +91,9 @@ enyo.kind({
 			this.$.itemValue.setContent(record.value);
 			return true;
 		}
+	},
+	closePopup: function(inSender) {
+		this.$.deadappPopup.close();
 	},
 	loadData: function(inSender) {
 		enyo.warn("Querying data source at: " + useUrl);
@@ -82,9 +117,15 @@ enyo.kind({
 		console.log("Formatted data: " + JSON.stringify(flattenedData));
 		enyo.warn("Updating UI...");
 		this.$.DeploymentDetail.setContent(this.data.currentDeploymentStep);
-		this.$.DeploymentImage.setSrc(this.data.deploymentImgURL)
+		//this.$.DeploymentImage.setSrc("http://chat.webosarchive.com/image.php?" + this.data.deploymentImgURL)
 		this.data = flattenedData;
 		this.$.list.refresh();
+						//Inform user about EOL
+						console.log("about to")
+						message = "Now that the telescope is in its final orbit, the data source for this app has gone stale. I'd love to find a new way to bring the app back to life -- if you have ideas (or an interesting API!) drop me a line: curator@webosarchive.com";
+						this.$.deadappMessage.setContent(message);
+						this.$.deadappPopup.openAtCenter();
+						console.log("done");
 	},
 	captions: [
 		"Distance From Earth",
