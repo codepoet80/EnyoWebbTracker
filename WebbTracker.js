@@ -135,7 +135,7 @@ enyo.kind({
 			//alert("value " + this.data[key] + " is label " + key); // "User john is #234"
 			var label = key.replace(/\_/g, " ");
 			if (key != "timestamp" && key != "image")
-				flattenedData.push({ caption: label, value: this.data[key] + this.units[pos] });
+				flattenedData.push({ caption: label, value: this.data[key] });
 			pos++;
 		}
 		console.log("Formatted data: " + JSON.stringify(flattenedData));
@@ -146,15 +146,4 @@ enyo.kind({
 		this.data = flattenedData;
 		this.$.list.refresh();
 	},
-	units: [
-		" km",
-		"",
-		" km/s",
-		" °C",
-		" °C",
-		" °C",
-		" °C",
-		"",
-		""
-	]
 });
