@@ -20,7 +20,7 @@ enyo.kind({
 				]},
 				{kind: "Scroller", flex:1, domStyles: {"margin-top": "0px", "min-width": "130px"}, components: [
 					{flex: 1, name: "list", kind: enyo.VirtualList, className: "list", onSetupRow: "listSetupRow", components: [
-						{kind: "Item", className: "item", components: [
+						{kind: "Item", className: "item", onclick:"selectNextView", components: [
 							{kind: "HFlexBox", components: [
 								{name: "itemCaption", flex: 2},
 								{w: "fill", flex: 1, name: "itemValue", domStyles: {"text-align": "right"}}
@@ -29,7 +29,7 @@ enyo.kind({
 					]},
 				]},
 				{kind: "Toolbar", components: [
-					{kind: "GrabButton"},
+					{kind: "GrabButton", onclick: "selectNextView"},
 					{caption: "Update", onclick: "periodicUpdate"}
 				]}
 			]},
@@ -115,16 +115,14 @@ enyo.kind({
 		this.$.deadappPopup.openAtCenter();
 	},
 	selectNextView: function () {
-		if (this.environment && this.environment.modelName.toLowerCase() != "touchpad") {
-			var pane    = this.$.slidingPane;
-			var viewIdx = pane.getViewIndex();
-			if (viewIdx < pane.views.length - 1) {
-				viewIdx = viewIdx + 1;
-			} else {
-				return;	// we've selected the last available view.
-			}
-			pane.selectViewByIndex(viewIdx);
+		var pane    = this.$.slidingPane;
+		var viewIdx = pane.getViewIndex();
+		if (viewIdx < pane.views.length - 1) {
+			viewIdx = viewIdx + 1;
+		} else {
+			return;	// we've selected the last available view.
 		}
+		pane.selectViewByIndex(viewIdx);
 	},
 	queryResponse: function(inSender, inResponse) {
 		this.data = inResponse;
