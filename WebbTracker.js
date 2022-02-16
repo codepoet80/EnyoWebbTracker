@@ -3,6 +3,7 @@ enyo.kind({
 	name: "enyo.WebbTracker",
 	kind: enyo.VFlexBox,
 	components: [
+		{kind: "ApplicationEvents", onWindowRotated: "windowRotated"},
 		{kind: "WebService", name:"wsQuery", url: useUrl, onSuccess: "queryResponse", onFailure: "queryFail"},
 		{kind: "Helpers.Updater", name: "myUpdater" },
 		//UI Elements
@@ -33,11 +34,11 @@ enyo.kind({
 					{caption: "Update", onclick: "periodicUpdate"}
 				]}
 			]},
-			{name: "panelAccessories", width: "300px", /*fixedWidth: true,*/ components: [
+			{name: "panelImage", /*fixedWidth: true,*/ components: [
 				{kind: "Scroller", flex:1, domStyles: {"margin-top": "0px", "min-width": "130px"}, components: [
 					{kind: "VFlexBox", flex: 2, pack: "center", components: [
 						{w: "fill", domStyles: {"text-align": "center"}, components: [
-							{kind: "Image", flex:1, name: "DeploymentImage", src: "jwtelescope.png", domStyles: {width: "400px", "margin-left": "auto", "margin-right": "auto"}},
+							{kind: "Image", flex:1, name: "DeploymentImage", src: "jwtelescope.png", domStyles: { width: "400px", "margin-left": "auto", "margin-right": "auto"}},
 						]},
 					]},
 				]},
@@ -139,9 +140,19 @@ enyo.kind({
 		console.log("Formatted data: " + JSON.stringify(flattenedData));
 		enyo.warn("Updating UI...");
 		imgUrl = useUrl.replace("weekly.json","") + this.data.image;
-		this.$.DeploymentImage.applyStyle("width", (window.innerWidth * 0.6) + "px");
+		deviceInfo = enyo.fetchDeviceInfo();
+		
+		var useWidth = screen.width - 350;
+		enyo.warn("Window width is: " + useWidth);
+		enyo.log(JSON.stringify(deviceInfo));
+
+		this.$.DeploymentImage.applyStyle("width", (useWidth * 0.8) + "px");
 		this.$.DeploymentImage.setSrc(imgUrl);
 		this.data = flattenedData;
 		this.$.list.refresh();
 	},
+	windowRotated: function() {
+		enyo.error("window resized!");
+		enyo.windows.addBannerMessage("Detecting rotation...", "{}");
+	}
 });

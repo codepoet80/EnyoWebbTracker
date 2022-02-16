@@ -7,5 +7,6 @@
 	"title": "Webb Tracker",
 	"splashicon": "jwlogo.png",
 	"icon": "icon.png",
-	"uiRevision": 2
+	"uiRevision": 2,
+	"requiredPermissions": ["applications.internal", "applications", "activities.manage", "devices", "settings", "settings.read", "services", "database", "database.internal", "filecache", "system", "networking", "networking.internal"]
 }
