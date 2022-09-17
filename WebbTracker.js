@@ -1,4 +1,4 @@
-﻿var useUrl = "http://www.webosarchive.com/jameswebb/weekly.json";
+﻿var useUrl = "http://www.webosarchive.org/jameswebb/weekly.json";
 enyo.kind({
 	name: "enyo.WebbTracker",
 	kind: enyo.VFlexBox,
