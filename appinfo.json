@@ -8,5 +8,5 @@
 	"splashicon": "jwlogo.png",
 	"icon": "icon.png",
 	"uiRevision": 2,
-	"requiredPermissions": ["applications.internal", "applications", "activities.manage", "devices", "settings", "settings.read", "services", "database", "database.internal", "filecache", "system", "networking", "networking.internal"]
+	"requiredPermissions": ["appmanager.management", "download.management", "preferences.systempropertyquery", "systemsettings.management"]
 }
