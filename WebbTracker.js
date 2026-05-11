@@ -1,4 +1,12 @@
-﻿var shareServiceUrl = "http://share.webosarchive.org/get-shares.php?username=jameswebb";
+﻿var localImages = [
+	"images/cf19ea28.png",
+	"images/f36afbad.png",
+	"images/ibbebecf.png",
+	"images/nbd947ae.png",
+	"images/vc625f06.png",
+	"images/w7dd68c8.png",
+	"images/xf9dd2ad.png"
+];
 var useDate;
 var downloadDone = false;
 enyo.kind({
@@ -6,15 +14,7 @@ enyo.kind({
 	kind: enyo.VFlexBox,
 	components: [
 		{kind: "ApplicationEvents", onWindowRotated: "windowRotated"},
-		{kind: "WebService", name:"shareServiceQuery", url: shareServiceUrl, 
-			headers: { 
-				"client-id": window.atob(appKeys.clientId),
-				"credential":  window.atob(appKeys.clientCreds)
-			}, 
-			onSuccess: "queryResponse", 
-			onFailure: "queryFail"
-		},
-		{kind: "PalmService", name: "downloadService", service: "palm://com.palm.downloadmanager/", method: "download", onSuccess: "downloadSuccess", onFailure: "downloadFailure", subscribe: true },
+		{kind: "WebService", name:"localDataQuery", url: "spaceshipdata.json", onSuccess: "localDataResponse", onFailure: "localDataFail"},
 		{kind: "PalmService", name: "wallpaperService", service: "palm://com.palm.systemservice/wallpaper", method: "importWallpaper", onSuccess: "wallpaperSuccess", onFailure: "wallpaperFailure", subscribe: true },
 		{kind: "PalmService", name: "preferencesService", service: "palm://com.palm.systemservice", method: "setPreferences", onSuccess: "preferencesSuccess", onFailure: "preferencesFailure", subscribe: true },
 		{kind: "Helpers.Updater", name: "myUpdater" },
@@ -36,7 +36,7 @@ enyo.kind({
 						{kind: "Item", className: "item", onclick:"selectNextView", components: [
 							{kind: "HFlexBox", components: [
 								{name: "itemCaption", flex: 2},
-								{w: "fill", flex: 1, name: "itemValue", domStyles: {"text-align": "right"}}
+								/*{w: "fill", flex: 1, name: "itemValue", domStyles: {"text-align": "right"}}*/
 							]},
 						]}
 					]},
@@ -60,37 +60,13 @@ enyo.kind({
 				]}
 			]},
 		]},
-		{
-            kind: "Popup",
-            name: "deadappPopup",
-            lazy: false,
-            layoutKind: "VFlexLayout",
-            style: "width: 80%;height:240px",
-            components: [
-                { content: "<b>James Webb is in position!</b>" },
-                {
-                    kind: "BasicScroller",
-                    flex: 1,
-                    components: [
-                        { name: "deadappMessage", kind: "HtmlContent", flex: 1, pack: "center", align: "left", style: "text-align: left;padding-top:10px;padding-bottom: 10px" }
-                    ]
-                },
-                {
-                    layoutKind: "HFlexLayout",
-                    pack: "center",
-                    components: [
-                        { kind: "Button", caption: "OK", onclick: "closePopup" },
-                    ]
-                }
-            ]
-        },
 	],
 	create: function() {
 		this.inherited(arguments);
 		var today = new Date();
 		useDate = today.getFullYear() + "-" + today.getMonth() + "-" + today.getDate();
 		enyo.log("using date: " + useDate);
-		
+
 		//Detect environment for appropriate service paths
         enyo.log("Window location is " + JSON.stringify(window.location));
         if(window.location.href.indexOf("file:///media/cryptofs") != -1) { // Running on LuneOS
@@ -108,26 +84,29 @@ enyo.kind({
 		this.$.btnWallpaper.disabled = true;
 
 	},
+	pickRandomImage: function() {
+		var idx = Math.floor(Math.random() * localImages.length);
+		this.currentImgSrc = localImages[idx];
+		this.$.DeploymentImage.setSrc(this.currentImgSrc);
+		this.$.btnWallpaper.setDisabled(false);
+		this.resizeImage();
+	},
 	listSetupRow: function(inSender, inIndex) {
 		if (this.data) {
 			var record = this.data[inIndex];
 			if (record) {
-				this.$.itemCaption.setContent(record.caption);
-				this.$.itemValue.setContent(record.value);
+				this.$.itemCaption.setContent(record.caption + ": " + record.value);
+				//this.$.itemValue.setContent(record.value);
 				return true;
 			}
 		}
 	},
-	closePopup: function(inSender) {
-		this.$.deadappPopup.close();
+	loadData: function() {
+		this.pickRandomImage();
+		this.$.localDataQuery.call();
 	},
-	loadData: function(inSender) {
-		this.$.shareServiceQuery.call();
-	},
-	periodicUpdate: function(inSender) {
-		message = "Now that the telescope is in position, the API this app was using has gone offline. In its place, and until I find a replacement, I'm doing periodic manual updates (roughly weekly). As a result, this Update button currently does nothing. Launch the app another time to see if there's a new image or details.";
-		this.$.deadappMessage.setContent(message);
-		this.$.deadappPopup.openAtCenter();
+	periodicUpdate: function() {
+		this.pickRandomImage();
 	},
 	selectNextView: function () {
 		var pane    = this.$.slidingPane;
@@ -139,39 +118,26 @@ enyo.kind({
 		}
 		pane.selectViewByIndex(viewIdx);
 	},
-	queryResponse: function(inSender, inResponse) {
-		var shareList = inResponse;
-		var imgUrl;
-		enyo.log("Parsing raw data: " + JSON.stringify(shareList));
-		flattenedData = [];
-		for (var key in shareList.shares) {
-			enyo.log(shareList.shares[key]);
-			if (shareList.shares[key].contenttype && shareList.shares[key].contenttype == "application/json")
-				this.data = shareList.shares[key].content;
-			if (!imgUrl && shareList.shares[key].contenttype.indexOf("image/png") != -1)
-				imgUrl = shareList.shares[key].content;
-		}
-		for (var key in this.data) {
+	localDataResponse: function(inSender, inResponse) {
+		enyo.log("Parsing local data: " + JSON.stringify(inResponse));
+		var flattenedData = [];
+		for (var key in inResponse) {
 			var label = key.replace(/\_/g, " ");
 			if (key == "Time_Since_Launch") {
-				date1 = new Date("12/25/2021");  
-				date2 = new Date(); 
-				var time_difference = date2.getTime() - date1.getTime();  
-				var days_difference = time_difference / (1000 * 60 * 60 * 24);  
-				this.data[key] = Math.round(days_difference) + " Days";
+				var date1 = new Date("12/25/2021");
+				var date2 = new Date();
+				var days_difference = (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24);
+				inResponse[key] = Math.round(days_difference) + " Days";
 			}
 			if (key != "timestamp" && key != "image")
-				flattenedData.push({ caption: label, value: this.data[key] });
+				flattenedData.push({ caption: label, value: inResponse[key] });
 		}
 		enyo.log("Formatted data: " + JSON.stringify(flattenedData));
 		this.data = flattenedData;
 		this.$.list.refresh();
-
-		this.$.DeploymentImage.setSrc(imgUrl);
-		window.setTimeout(function() { 
-			this.$.btnWallpaper.setDisabled(false);
-		}.bind(this), 3000);
-		this.resizeImage();
+	},
+	localDataFail: function(inSender, inResponse) {
+		enyo.error("Failed to load local data: " + JSON.stringify(inResponse));
 	},
 	windowRotated: function() {
 		enyo.warn("window resized!");
@@ -190,21 +156,11 @@ enyo.kind({
 
 	setWallpaper: function() {
 		downloadDone = false;
-		var useImg = this.$.DeploymentImage.src.replace("i.php?", "image.php?");
-		enyo.log("trying to set wallpaper to: " + this.$.DeploymentImage.src);
-		this.$.downloadService.call({ target: this.$.DeploymentImage.src, targetFilename: "jameswebb-wallpaper-" + useDate + ".png" });
-	},
-
-	//Service calls related to getting and setting wallpaper
-	downloadSuccess: function(sender, data) {
-		if (data.completed && data.completed == true) {
-			enyo.log("Download wallpaper success: " + JSON.stringify(data));
-			enyo.log("Importing as wallpaper...");
-			this.$.wallpaperService.call( {target: "/media/internal/downloads/jameswebb-wallpaper-" + useDate + ".png" } );
-		}
-	},
-	downloadFailure: function(sender, data) {
-		enyo.error("Download wallpaper failure: " + JSON.stringify(data));
+		// Derive the absolute filesystem path from the app's location
+		var base = window.location.href.substring(0, window.location.href.lastIndexOf("/") + 1);
+		var imgPath = (base + this.currentImgSrc).replace(/^file:\/\//, "");
+		enyo.log("trying to set wallpaper to: " + imgPath);
+		this.$.wallpaperService.call({ target: imgPath });
 	},
 	wallpaperSuccess: function(sender, data) {
 		enyo.log("Import wallpaper success: " + JSON.stringify(data));

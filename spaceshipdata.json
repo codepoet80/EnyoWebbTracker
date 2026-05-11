@@ -1,11 +1,8 @@
 {
-    "Distance_From_Earth": 1223852.2,
-    "Time_Since_Launch": "19:05:04:41",
+    "Distance_From_Earth": "More than 1223852.2 miles from earth",
+    "Launch_Date": "25 December, 2021",
     "Percent_Completed": 100,
     "Current_Deployment_Step": "Science Operations",
-    "Sunshield_Temp": 54,
-    "Equipment_Bus_Temp": 11,
-    "Primary_Mirror_Temp": -193,
-    "Instrument_Temp": -200,
+    "App_Status": "No longer tracking Webb, enjoy a random picture!",
     "timestamp": "2023-01-15T17:24:42.021Z"
 }

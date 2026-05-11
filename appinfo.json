@@ -1,6 +1,6 @@
 {
 	"id": "com.jonandnic.enyo.webbtracker",
-	"version": "1.0.5",
+	"version": "1.1.0",
 	"vendor": "Jon W",
 	"type": "web",
 	"main": "index.html",
